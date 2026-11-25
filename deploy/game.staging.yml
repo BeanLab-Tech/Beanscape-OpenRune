@@ -1,0 +1,35 @@
+# Beanscape staging world on VM 123 (OpenRune). Copy to game.yml on the VM; secrets stay there.
+# Runs next to the live revision 233 server, so it uses its own port and world id.
+name: "Beanscape Staging"
+game-port: 43595
+revision: 242
+environment: "LIVE"
+world: 2
+
+world-types: ["main"]
+
+gameplay:
+  # Quests count as completed for requirement checks (replaces ::questsdone for gating).
+  quest-requirements:
+    mode: assume-completed
+  farming-growth-rate: 1
+  drop-rates:
+    multiplier: 1.0
+  level-up-popups: false
+  idle-logout: true
+  home-teleport-cooldown: 30
+  random-events: true
+  bots-enabled: false
+
+# Central runs as its own service on the VM (plan decision D2). Fill in the world key and
+# Postgres password on the VM only.
+central:
+  same-instance: false
+  host: "127.0.0.1"
+  link-port: 9091
+  world-key: "SET_ON_VM"
+  postgres:
+    jdbc-url: "jdbc:postgresql://127.0.0.1:5432/openrune_central"
+    user: "openrune"
+    password: "SET_ON_VM"
+    pool-size: 10

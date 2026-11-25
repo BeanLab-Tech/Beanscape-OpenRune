@@ -1,0 +1,82 @@
+name: Beanscape CI
+
+# Build, test and boot the fork. Runs on pushes to main and on pull requests.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: beanlab-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: build, test & boot
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Cache game data
+        id: gamecache
+        uses: actions/cache@v6
+        with:
+          path: |
+            .data/cache
+            .data/xteas.json
+            .data/gamevals-binary/gamevals.dat
+            .data/gamevals-binary/gamevals_generated.dat
+          key: game-cache-v2-${{ hashFiles('game.example.yml') }}
+
+      - name: Generate cache and gameval sources
+        if: steps.gamecache.outputs.cache-hit != 'true'
+        run: ./gradlew :or-cache:freshCache :or-cache:mergePluginGamevals
+
+      - name: Rebuild sources from cached game data
+        if: steps.gamecache.outputs.cache-hit == 'true'
+        run: ./gradlew :or-cache:buildCache :or-cache:mergePluginGamevals
+
+      - name: Game config and RSA keys
+        run: |
+          [ -f game.yml ] || cp game.example.yml game.yml
+          ./gradlew generateRsa
+
+      - name: Compile and test
+        run: ./gradlew assemble test
+
+      - name: Boot to ready with Beanscape modules loaded
+        run: |
+          ./gradlew run -q > boot.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 300); do
+            grep -q "Server ready in" boot.log && break
+            kill -0 "$SERVER_PID" 2>/dev/null || break
+            sleep 1
+          done
+          grep -q "Server ready in" boot.log || { echo "Server did not reach ready"; tail -60 boot.log; exit 1; }
+          grep -q "\[beanlab\] loaded" boot.log || { echo "Beanscape modules not loaded"; tail -60 boot.log; exit 1; }
+          grep -o "Server ready in [0-9.]*s" boot.log | head -1
+
+      - name: Upload boot log
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: boot-log
+          path: boot.log
+          if-no-files-found: ignore
