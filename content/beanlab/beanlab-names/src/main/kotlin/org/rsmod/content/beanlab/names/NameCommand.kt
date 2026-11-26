@@ -96,6 +96,7 @@ constructor(private val db: GameDbManager, private val playerList: PlayerList) :
             currentName(conn, accountId, characterId)
                 ?: return RenameOutcome.Refused("Character record not found - contact an admin.")
         val sanitized = DisplayNamePolicy.sanitize(raw)
+        lockName(conn, sanitized)
         val held = activeHold(conn, sanitized, characterId)
         val result = checkRename(raw, current, changedAt, now, staff, held)
         refusal(result, changedAt, now)?.let {
@@ -143,6 +144,14 @@ constructor(private val db: GameDbManager, private val playerList: PlayerList) :
                     name to changedAt
                 }
             }
+
+    /** Serialises renames to the same name until this transaction ends (the checks below race). */
+    private fun lockName(conn: DatabaseConnection, name: String) {
+        conn.prepareStatement("SELECT pg_advisory_xact_lock(hashtext(lower(trim(?))))").use {
+            it.setString(1, name)
+            it.executeQuery().close()
+        }
+    }
 
     private fun activeHold(conn: DatabaseConnection, name: String, characterId: Int): Long? =
         conn
