@@ -34,7 +34,7 @@ is `docs/OPENRUNE_PHASE1_PLAN.md` in BeanLab-Tech/Beanscape-OSRS-Private-Server.
 ## Staging on VM 123
 | Piece | Where |
 |---|---|
-| Game | `beanscape-staging` service, `/opt/osrs/openrune/server` (this repo, `main`), world 2, port 40002, tailnet only. Build and restart: `deploy/staging/README.md` |
+| Game | `beanscape-staging` service, `/opt/osrs/openrune/server` (this repo, `main`), world 2, port 40002, tailnet only. **Auto-deploys** every CI-green `main` within 5 minutes (`beanscape-staging-deploy.timer`, `deploy/staging/deploy-staging.sh`), so merging restarts staging; `game.yml` is rendered from `deploy/game.staging.yml` on each deploy. Details: `deploy/staging/README.md` |
 | Port | The client has no port setting; jav_config `param=15` (build) non-zero makes it connect to `40000 + world`. `deploy/staging/make-webconfig.py` writes that jav_config to `/opt/osrs/config/webconfig/staging/` |
 | Central | `openrune-central` service, Postgres `openrune_central` (localhost), HTTP 8090, world link 9091: `deploy/central/README.md` |
 | Accounts | Central `public.accounts`; realm 2 requires registration and world 2 has a login whitelist (`world_login_whitelist`). Staff: `accounts.rights` `MOD`/`ADMINISTRATOR`; owners also have a row in `beanlab.owners` |
@@ -50,8 +50,9 @@ is `docs/OPENRUNE_PHASE1_PLAN.md` in BeanLab-Tech/Beanscape-OSRS-Private-Server.
 ## Beanscape modules
 | Module | What | Notes |
 |---|---|---|
-| `beanlab-core` | `[beanlab] loaded` marker; `BeanlabSchema` migrations for the `beanlab` Postgres schema | |
+| `beanlab-core` | `[beanlab] loaded` marker; `BeanlabSchema` migrations for the `beanlab` Postgres schema; `TeleportCatalog` (shared by the admin API and `::teleports`) | |
 | `beanlab-ge` | Grand Exchange (`::ge buy/sell/offers/cancel/collect/price`) | Ported from rev 233; tables in `beanlab.ge_*` |
+| `beanlab-admin-tools` | Staff in-game tools: `::teleports` / `::tp` menu (MOD and up; categories, search, previous, typed coordinates) | Ported from rev 233 `admin-potato`; potato and `::questsdone` still to come |
 | `beanlab-admin-api` | Admin console API for the Beanscape Admin plugin (loopback HTTP, `ADMIN_API_PORT`), `::admintoken` (owners); `GET/PUT /v1/hub/layout` (owners) for the plugin's Hub map tab | Ported from rev 233; tokens/audit in `beanlab.admin_*`; owners in `beanlab.owners` (Central rights stop at ADMINISTRATOR) |
 | `beanlab-hub` (+ `pack`) | Market Hub: a clan hall portal on the GE plaza bench tile (3182, 3468) leads to a hub at x 5120-5219, z 3072-3171 (map squares 80..81 x 48..49). Layout in `pack/.../hub-layout.json` (format: `docs/HUB_LAYOUT.md` in the other repo); walls, objects and NPCs spawned at startup; `::hub` admin commands edit it live and save `.data/hub-layout.json` (or `HUB_LAYOUT_FILE`) | Ported from rev 233. Floors are generated from the bundled layout by `HubTerrainTask` during `buildCache`, so a floor change needs a cache rebuild; an override file only changes walls, objects, NPCs, arrival and leave portal (restart) |
 

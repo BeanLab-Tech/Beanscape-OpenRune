@@ -33,6 +33,7 @@ import org.rsmod.api.player.ui.PlayerInterfaceUpdates
 import org.rsmod.api.realm.Realm
 import org.rsmod.api.server.config.ServerConfig
 import org.rsmod.api.utils.system.SafeServiceExit
+import org.rsmod.content.beanlab.core.TeleportCatalog
 import org.rsmod.game.entity.Player
 import org.rsmod.game.entity.PlayerList
 import org.rsmod.game.stat.PlayerSkillXPTable

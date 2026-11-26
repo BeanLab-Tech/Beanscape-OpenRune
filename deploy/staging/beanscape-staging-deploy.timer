@@ -1,0 +1,10 @@
+[Unit]
+Description=Check the fork's GitHub main for a new staging build every 5 minutes
+
+[Timer]
+OnBootSec=3min
+OnUnitActiveSec=5min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -22,8 +22,8 @@ gameplay:
   random-events: true
   bots-enabled: true
 
-# Central runs as its own service on the VM (plan decision D2). Fill in the world key and
-# Postgres password on the VM only.
+# Central runs as its own service on the VM (plan decision D2). The two SET_ON_VM values are filled
+# in from /opt/osrs/openrune/secrets.env by deploy/staging/deploy-staging.sh; never commit them.
 central:
   same-instance: false
   host: "127.0.0.1"
@@ -34,3 +34,6 @@ central:
     user: "openrune"
     password: "SET_ON_VM"
     pool-size: 10
+
+# Log Central world-link auth timings and failures (staging diagnostics).
+login-timing-logs: true

@@ -1,4 +1,4 @@
-package org.rsmod.content.beanlab.admin.api
+package org.rsmod.content.beanlab.core
 
 import org.rsmod.map.CoordGrid
 
