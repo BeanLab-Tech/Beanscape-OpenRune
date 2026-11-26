@@ -1,0 +1,7 @@
+[Unit]
+Description=Back up the OpenRune Central database (Beanscape staging)
+After=postgresql.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/osrs/openrune/pgdump.sh
