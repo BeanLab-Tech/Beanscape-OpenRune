@@ -70,5 +70,6 @@ is `docs/OPENRUNE_PHASE1_PLAN.md` in BeanLab-Tech/Beanscape-OSRS-Private-Server.
 - **Central is patched:** the VM runs Central `d694191` plus `deploy/central/patches/` (the
   world-login whitelist was broken, so no one could log in to a whitelisted world). Rebuilding
   Central without the patches brings that back; see `deploy/central/README.md`.
-- **Bots:** OpenRune's cosmetic bots (`gameplay.bots-enabled`) are off on staging. With them on,
-  bots fill busy areas near a player (Lumbridge etc.); `::bots on|off|here` manages them in game.
+- **Bots:** OpenRune's cosmetic bots (`gameplay.bots-enabled`) are on for staging since
+  2026-11-25. They fill busy areas (Lumbridge etc.) only while a player is near;
+  `::bots on|off|count|here` manages them in game.
