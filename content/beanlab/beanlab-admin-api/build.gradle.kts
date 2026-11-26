@@ -12,5 +12,6 @@ dependencies {
     implementation(projects.api.serverConfig)
     implementation(projects.api.utils.utilsSystem)
     implementation(projects.content.beanlab.beanlabCore)
+    implementation(projects.content.beanlab.beanlabHub)
     testImplementation(kotlin("test"))
 }

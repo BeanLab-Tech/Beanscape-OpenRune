@@ -25,7 +25,12 @@ public enum class Rank {
 public data class Actor(val accountId: Int, val username: String, val rank: Rank)
 
 /** A refusal or failure with the HTTP status to send and a message fit to show an admin. */
-public class ApiError(public val status: Int, message: String) : RuntimeException(message)
+public class ApiError(
+    public val status: Int,
+    message: String,
+    /** Extra fields for the JSON error body, such as a list of validation problems. */
+    public val details: Map<String, Any?> = emptyMap(),
+) : RuntimeException(message)
 
 /** A write the API performed (or refused), recorded for the audit log. */
 public data class AuditEntry(

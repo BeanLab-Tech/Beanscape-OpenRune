@@ -8,6 +8,7 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
+import org.rsmod.content.beanlab.hub.HubLayoutService
 
 class AdminRouterTest {
     private val mapper = ObjectMapper()
@@ -16,7 +17,10 @@ class AdminRouterTest {
     private val mod = Actor(3, "mo", Rank.Moderator)
     private val audits = mutableListOf<AuditEntry>()
     private val backend = FakeBackend()
-    private val router = AdminRouter(backend) { audits += it }
+    private val hubDir = java.nio.file.Files.createTempDirectory("hub")
+    private val hubFile = hubDir.resolve("hub-layout.json")
+    private val router =
+        AdminRouter(backend, { audits += it }, FileHubLayoutPort(HubLayoutService(hubFile)))
 
     private fun json(text: String): JsonNode = mapper.readTree(text)
 
@@ -93,6 +97,49 @@ class AdminRouterTest {
         val badLevel = """{"target":"Bob","x":1,"z":2,"level":9}"""
         assertEquals(400, refusal(mod, "POST", "/v1/teleport", badLevel))
         assertTrue(backend.calls.none { it.startsWith("reboot") || it.startsWith("broadcast") })
+    }
+
+    @Test
+    fun `hub layout routes are owner only`() {
+        assertEquals(403, refusal(admin, "GET", "/v1/hub/layout"))
+        assertEquals(403, refusal(admin, "PUT", "/v1/hub/layout", "{}"))
+        assertEquals(403, refusal(mod, "GET", "/v1/hub/layout"))
+        assertFalse(java.nio.file.Files.exists(hubFile))
+        assertEquals("PUT /v1/hub/layout", audits.last().action)
+        assertFalse(audits.last().ok)
+    }
+
+    @Test
+    fun `hub layout reads the bundled file and saves a valid edit as an override`() {
+        val first = call(owner, "GET", "/v1/hub/layout")
+        assertEquals("bundled", first["source"])
+        assertEquals(false, first["floorsEditable"])
+        val layout = first["layout"] as JsonNode
+        assertEquals(1, layout["version"].asInt())
+
+        val edited = layout.deepCopy<com.fasterxml.jackson.databind.node.ObjectNode>()
+        edited.putObject("arrival").put("x", 80).put("z", 12)
+        val saved = call(owner, "PUT", "/v1/hub/layout", edited.toString())
+        assertEquals(true, saved["ok"])
+        assertEquals("hub-layout", audits.last().action)
+        assertTrue(audits.last().ok)
+
+        val again = call(owner, "GET", "/v1/hub/layout")
+        assertEquals("override", again["source"])
+        assertEquals(80, (again["layout"] as JsonNode)["arrival"]["x"].asInt())
+    }
+
+    @Test
+    fun `hub layout problems come back as a list and nothing is written`() {
+        val error =
+            assertFailsWith<ApiError> {
+                call(owner, "PUT", "/v1/hub/layout", """{"version":1,"size":100}""")
+            }
+        assertEquals(422, error.status)
+        @Suppress("UNCHECKED_CAST") val problems = error.details["problems"] as List<String>
+        assertTrue(problems.any { it == "palette is empty" })
+        assertFalse(java.nio.file.Files.exists(hubFile))
+        assertFalse(audits.last().ok)
     }
 
     @Test

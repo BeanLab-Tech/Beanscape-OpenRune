@@ -56,7 +56,7 @@ public class AdminHttpServer(
                 val result = router.handle(actor, it.requestMethod, path(it), query(it), body)
                 reply(it, 200, result)
             } catch (error: ApiError) {
-                reply(it, error.status, mapOf("error" to error.message))
+                reply(it, error.status, mapOf("error" to error.message) + error.details)
             } catch (error: Exception) {
                 logger.error(error) { "[admin-api] unexpected failure on ${it.requestURI.path}" }
                 reply(it, 500, mapOf("error" to "The server hit an error."))
