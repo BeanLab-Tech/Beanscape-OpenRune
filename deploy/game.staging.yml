@@ -20,7 +20,7 @@ gameplay:
   idle-logout: true
   home-teleport-cooldown: 30
   random-events: true
-  bots-enabled: false
+  bots-enabled: true
 
 # Central runs as its own service on the VM (plan decision D2). Fill in the world key and
 # Postgres password on the VM only.
