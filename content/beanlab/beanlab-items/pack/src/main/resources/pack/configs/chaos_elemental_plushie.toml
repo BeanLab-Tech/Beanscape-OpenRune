@@ -1,0 +1,26 @@
+# Wieldable toy in the same slot as the Jad plush. The mesh is the Chaos
+# Elemental Jr. model, scaled to plush size and sat in the hand. Defined on its
+# own so it does not keep the Jad plush's placeholder link.
+[[item]]
+id = "obj.chaos_elemental_plushie"
+name = "Chaos elemental plushie"
+examine = "A stuffed Chaos Elemental. The stuffing looks a little scorched."
+inventoryModel = "models.chaos_elemental_plushie"
+maleModel0 = "models.chaos_elemental_plushie_worn"
+femaleModel0 = "models.chaos_elemental_plushie_worn"
+equipSlot = 5
+wearpos1 = 5
+xan2d = 121
+yan2d = 1811
+zan2d = 0
+zoom2d = 888
+xOffset2d = -5
+yOffset2d = -10
+weight = 1.0
+cost = 1
+tradeable = false
+members = false
+interfaceOptions = ["", "Wield", "", "", "Destroy"]
+
+[item.params]
+"param.destroy_note_desc" = "You can get a replacement from Diango."
