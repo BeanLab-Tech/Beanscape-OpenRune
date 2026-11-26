@@ -8,7 +8,8 @@ changed, the staging deploy and the rules. In short:
 - Our code goes in `content/beanlab/beanlab-<thing>` and `deploy/`. Edits to OpenRune files stay
   small, are marked `// BeanLab:` and are listed in `UPSTREAM.md`.
 - CI is `.github/workflows/beanlab-ci.yml` (build, `content/beanlab/*` tests, boot to ready).
-  Merging to `main` does not deploy; staging is rebuilt by hand (`deploy/staging/README.md`).
+  Merging to `main` deploys: staging rebuilds and restarts within 5 minutes of a CI-green merge
+  (`deploy/staging/deploy-staging.sh`, see `deploy/staging/README.md`).
 - The live server (RsMod rev 233), the launcher and the Admin/Companion plugins live in
   [BeanLab-Tech/Beanscape-OSRS-Private-Server](https://github.com/BeanLab-Tech/Beanscape-OSRS-Private-Server);
   its `AGENTS.md` has the migration status.

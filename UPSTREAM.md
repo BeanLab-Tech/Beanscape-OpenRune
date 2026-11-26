@@ -34,7 +34,7 @@ is `docs/OPENRUNE_PHASE1_PLAN.md` in BeanLab-Tech/Beanscape-OSRS-Private-Server.
 ## Staging on VM 123
 | Piece | Where |
 |---|---|
-| Game | `beanscape-staging` service, `/opt/osrs/openrune/server` (this repo, `main`), world 2, port 40002, tailnet only. Build and restart: `deploy/staging/README.md` |
+| Game | `beanscape-staging` service, `/opt/osrs/openrune/server` (this repo, `main`), world 2, port 40002, tailnet only. **Auto-deploys** every CI-green `main` within 5 minutes (`beanscape-staging-deploy.timer`, `deploy/staging/deploy-staging.sh`), so merging restarts staging; `game.yml` is rendered from `deploy/game.staging.yml` on each deploy. Details: `deploy/staging/README.md` |
 | Port | The client has no port setting; jav_config `param=15` (build) non-zero makes it connect to `40000 + world`. `deploy/staging/make-webconfig.py` writes that jav_config to `/opt/osrs/config/webconfig/staging/` |
 | Central | `openrune-central` service, Postgres `openrune_central` (localhost), HTTP 8090, world link 9091: `deploy/central/README.md` |
 | Accounts | Central `public.accounts`; realm 2 requires registration and world 2 has a login whitelist (`world_login_whitelist`). Staff: `accounts.rights` `MOD`/`ADMINISTRATOR`; owners also have a row in `beanlab.owners` |
