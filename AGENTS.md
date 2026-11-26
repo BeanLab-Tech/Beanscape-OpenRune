@@ -1,3 +1,22 @@
+# Beanscape fork — read first
+
+This is **BeanLab-Tech/Beanscape-OpenRune**, Beanscape's fork of OpenRune-Server, running as the
+**staging** world on VM 123 (revision 242, world 2, port 40002). Before changing anything, read
+[`UPSTREAM.md`](UPSTREAM.md): it lists our modules (`content/beanlab/*`), the OpenRune files we
+changed, the staging deploy and the rules. In short:
+
+- Our code goes in `content/beanlab/beanlab-<thing>` and `deploy/`. Edits to OpenRune files stay
+  small, are marked `// BeanLab:` and are listed in `UPSTREAM.md`.
+- CI is `.github/workflows/beanlab-ci.yml` (build, `content/beanlab/*` tests, boot to ready).
+  Merging to `main` does not deploy; staging is rebuilt by hand (`deploy/staging/README.md`).
+- The live server (RsMod rev 233), the launcher and the Admin/Companion plugins live in
+  [BeanLab-Tech/Beanscape-OSRS-Private-Server](https://github.com/BeanLab-Tech/Beanscape-OSRS-Private-Server);
+  its `AGENTS.md` has the migration status.
+- **Keep `UPSTREAM.md` (and this block) current** in the same PR as any change to modules,
+  OpenRune files, ports, services or workflow.
+
+The rest of this file is OpenRune's own guide and applies unchanged.
+
 # OpenRune-Server — Agent Guide
 
 OSRS-compatible game server (revision 240.2), Kotlin, modular fork of RSMod/Alter.

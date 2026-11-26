@@ -15,6 +15,33 @@ is `docs/OPENRUNE_PHASE1_PLAN.md` in BeanLab-Tech/Beanscape-OSRS-Private-Server.
 - OpenRune's own workflows (releases, test-server deploys, wiki and README bots) stay disabled here;
   our CI is `.github/workflows/beanlab-ci.yml`.
 
+## Repositories
+| Repo | What | Clone on bean-laptop |
+|---|---|---|
+| `BeanLab-Tech/Beanscape-OpenRune` (this one) | Server for staging (OpenRune rev 242) | `C:\Users\cfiaschetti\Beanscape-OpenRune` |
+| `BeanLab-Tech/Beanscape-OSRS-Private-Server` | Live server (RsMod rev 233), launcher (`client/launcher`, Live/Staging switch), Admin and Companion plugins, web panel, Discord bot; migration plan and status in its `AGENTS.md` | `C:\Users\cfiaschetti\Beanscape-OSRS-Private-Server` |
+
+## Build and test
+- Fresh checkout: `./gradlew :or-cache:freshCache :or-cache:mergePluginGamevals`, then
+  `cp game.example.yml game.yml` and `./gradlew generateRsa`.
+- Our tests: `./gradlew :content:beanlab:<module>:test`. Run locally with `./gradlew run`
+  (embedded Postgres + Central, `central.same-instance: true`).
+- Add `--no-configuration-cache` for `installDist`/`run` if the configuration cache fails.
+- Our tables live in the `beanlab` Postgres schema. Each module ships `V<n>__*.sql` resources and
+  applies them with `BeanlabSchema.migrate(conn, module, owner, files)` (recorded in
+  `beanlab.schema_migrations`). Never edit an applied file; add a new version.
+
+## Staging on VM 123
+| Piece | Where |
+|---|---|
+| Game | `beanscape-staging` service, `/opt/osrs/openrune/server` (this repo, `main`), world 2, port 40002, tailnet only. Build and restart: `deploy/staging/README.md` |
+| Port | The client has no port setting; jav_config `param=15` (build) non-zero makes it connect to `40000 + world`. `deploy/staging/make-webconfig.py` writes that jav_config to `/opt/osrs/config/webconfig/staging/` |
+| Central | `openrune-central` service, Postgres `openrune_central` (localhost), HTTP 8090, world link 9091: `deploy/central/README.md` |
+| Accounts | Central `public.accounts`; realm 2 requires registration and world 2 has a login whitelist (`world_login_whitelist`). Staff: `accounts.rights` `MOD`/`ADMINISTRATOR`; owners also have a row in `beanlab.owners` |
+| Admin API | `beanlab-admin-api` on `127.0.0.1:8088` (`ADMIN_API_PORT`, systemd drop-in), exposed as `https://runescape-server.tail5475a4.ts.net/adminapi-staging` |
+| Client | Microbot 2.6.57 (RuneLite 1.13.6), patched by the launcher in the other repo (`ar.class` modulus, `ud.class` host allowlist). The modulus is `.data/client.key` on the VM; a new key means a new modulus in the launcher's `server-config.cjs` |
+| Secrets | `/opt/osrs/openrune/secrets.env`, VM copies of `central-config.yaml` and `game.yml`. Never commit them |
+
 ## Upstream position
 | Date | OpenRune commit | Revision |
 |---|---|---|
