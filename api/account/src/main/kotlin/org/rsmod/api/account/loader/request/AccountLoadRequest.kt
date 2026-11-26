@@ -52,4 +52,17 @@ public sealed class AccountLoadRequest {
         override val worldType: WorldType,
         override val callback: AccountLoadCallback,
     ) : WriteRequired()
+
+    /**
+     * Loads a pre-registered account (`realms.require_registration`): never creates an account row.
+     * If the account exists but has no character yet (registered outside the game, e.g. via a web or
+     * Discord sign-up), its first character is created. An unknown name gets `AccountNotFound`.
+     */
+    // BeanLab: require_registration enforcement (upstream candidate).
+    public data class SearchOrCreateCharacter(
+        override val auth: AccountLoadAuth,
+        override val accountName: String,
+        override val worldType: WorldType,
+        override val callback: AccountLoadCallback,
+    ) : WriteRequired()
 }

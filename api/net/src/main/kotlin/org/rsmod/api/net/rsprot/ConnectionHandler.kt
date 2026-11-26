@@ -145,6 +145,16 @@ private constructor(
 
         // Central auth runs after the account row exists (see AccountLoadResponseHook) so character id
         // and password are available; do not kick off here with a null character id.
+        // BeanLab: honour `realms.require_registration` (upstream candidate). Accounts are then
+        // created only outside the game (Discord sign-up); an unknown name is refused before Central
+        // auth, which would otherwise create it.
+        if (realmConfig.requireRegistration) {
+            val submitted = accountManager.loadRegistered(loadAuth, username, responseHook)
+            if (!submitted) {
+                responseHandler.writeFailedResponse(LoginResponse.LoginServerLoadError)
+            }
+            return
+        }
         val passwordForLocalCreate = password.copyOf()
         val requestSubmitted =
             accountManager.loadOrCreate(
