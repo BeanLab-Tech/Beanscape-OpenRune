@@ -3,5 +3,6 @@ plugins {
 }
 
 dependencies {
+    api(projects.api.db)
     implementation(projects.api.pluginCommons)
 }
