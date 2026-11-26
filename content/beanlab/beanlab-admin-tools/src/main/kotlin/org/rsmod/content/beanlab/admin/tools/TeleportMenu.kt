@@ -97,7 +97,7 @@ private suspend fun ProtectedAccess.teleportToTypedCoords() {
 
 /** `x z [level]`, separated by spaces or commas; null when it isn't that. */
 internal fun parseCoords(raw: String): TeleportDestination? {
-    val parts = raw.trim().split(Regex("[\s,]+")).map { it.toIntOrNull() }
+    val parts = raw.trim().split(Regex("[\\s,]+")).map { it.toIntOrNull() }
     if (parts.size !in 2..3 || parts.any { it == null }) return null
     val (x, z) = parts[0]!! to parts[1]!!
     val level = parts.getOrNull(2) ?: 0
