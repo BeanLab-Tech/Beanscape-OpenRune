@@ -1,0 +1,23 @@
+# Beanscape staging world (OpenRune rev 242, world 2) on VM 123, next to the live rev 233 server.
+# Clients reach it on 40002: with jav_config param 15 (build) != 0 the client connects to
+# 40000 + world id instead of 43594. Install: copy to /etc/systemd/system/, daemon-reload, enable.
+[Unit]
+Description=Beanscape staging game server (OpenRune)
+After=network-online.target postgresql.service openrune-central.service
+Wants=network-online.target
+Requires=openrune-central.service
+
+[Service]
+Type=simple
+User=osrs
+Group=osrs
+WorkingDirectory=/opt/osrs/openrune/server
+ExecStart=/opt/osrs/openrune/server/server/app/build/install/app/bin/app
+# Shutdown saves every online player; give it time before SIGKILL.
+TimeoutStopSec=120
+KillSignal=SIGTERM
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
