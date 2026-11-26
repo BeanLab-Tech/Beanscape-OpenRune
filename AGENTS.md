@@ -13,6 +13,9 @@ changed, the staging deploy and the rules. In short:
 - The live server (RsMod rev 233), the launcher and the Admin/Companion plugins live in
   [BeanLab-Tech/Beanscape-OSRS-Private-Server](https://github.com/BeanLab-Tech/Beanscape-OSRS-Private-Server);
   its `AGENTS.md` has the migration status.
+- Staff rights are Central's `accounts.rights` (`Rights.MOD`/`ADMINISTRATOR`); owners are rows in
+  `beanlab.owners`. Display names live in Central's `account_characters` and follow Central's
+  `DisplayNamePolicy` (`beanlab-names`); a write there reaches every world through Central.
 - **Keep `UPSTREAM.md` (and this block) current** in the same PR as any change to modules,
   OpenRune files, ports, services or workflow.
 
