@@ -15,6 +15,7 @@ public class AdminRouter(
     private val backend: AdminBackend,
     private val audit: AuditSink,
     private val hub: HubLayoutPort = FileHubLayoutPort(),
+    private val map: MapEditPort = UnavailableMapEditPort(),
 ) {
     private class Route(
         val method: String,
@@ -55,6 +56,8 @@ public class AdminRouter(
             route("POST", "/v1/world/reboot", Rank.Owner) { reboot(it) },
             route("GET", "/v1/hub/layout", Rank.Owner) { hubLayout() },
             route("PUT", "/v1/hub/layout", Rank.Owner) { saveHubLayout(it) },
+            route("POST", "/v1/map/loc", Rank.Owner) { editLoc(it) },
+            route("POST", "/v1/map/npc", Rank.Owner) { editNpc(it) },
             route("POST", "/v1/accounts", Rank.Admin) { createAccount(it) },
             route("POST", "/v1/accounts/(\\d+)/modlevel", Rank.Admin) { setAccountRank(it) },
             route("POST", "/v1/accounts/(\\d+)/password", Rank.Admin) { resetPassword(it) },
@@ -197,6 +200,46 @@ public class AdminRouter(
                 "ok" to true,
                 "message" to "Saved. Restart the server to apply walls, objects and NPCs.",
                 "problems" to emptyList<String>(),
+            )
+        }
+    }
+
+    // ---------------------------------------------------------------- world map
+
+    private fun editLoc(call: Call): Map<String, Any?> {
+        val op = call.body.path("op").asText("")
+        val name = call.body.path("name").asText("").trim()
+        return audited(call.actor, "map-loc", name, "$op ${int(call.body, "x")},${int(call.body, "z")}") {
+            mapOf(
+                "ok" to true,
+                "message" to
+                    map.editLoc(
+                        op,
+                        int(call.body, "x"),
+                        int(call.body, "z"),
+                        int(call.body, "level"),
+                        name,
+                        int(call.body, "shape"),
+                        int(call.body, "angle"),
+                    ),
+            )
+        }
+    }
+
+    private fun editNpc(call: Call): Map<String, Any?> {
+        val op = call.body.path("op").asText("")
+        val name = call.body.path("name").asText("").trim()
+        return audited(call.actor, "map-npc", name, "$op ${int(call.body, "x")},${int(call.body, "z")}") {
+            mapOf(
+                "ok" to true,
+                "message" to
+                    map.editNpc(
+                        op,
+                        int(call.body, "x"),
+                        int(call.body, "z"),
+                        int(call.body, "level"),
+                        name,
+                    ),
             )
         }
     }

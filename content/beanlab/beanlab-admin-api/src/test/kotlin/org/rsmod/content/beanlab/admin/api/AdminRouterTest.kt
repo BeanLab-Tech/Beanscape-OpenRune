@@ -100,6 +100,14 @@ class AdminRouterTest {
     }
 
     @Test
+    fun `map edits are owner only`() {
+        val body = """{"op":"add","x":3200,"z":3200,"level":0,"name":"chair","shape":10,"angle":0}"""
+        assertEquals(403, refusal(admin, "POST", "/v1/map/loc", body))
+        assertEquals(403, refusal(mod, "POST", "/v1/map/npc", body))
+        assertEquals(503, refusal(owner, "POST", "/v1/map/loc", body))
+    }
+
+    @Test
     fun `hub layout routes are owner only`() {
         assertEquals(403, refusal(admin, "GET", "/v1/hub/layout"))
         assertEquals(403, refusal(admin, "PUT", "/v1/hub/layout", "{}"))
