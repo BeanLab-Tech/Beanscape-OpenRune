@@ -7,7 +7,9 @@ import org.rsmod.api.db.gateway.GameDbManager
 import org.rsmod.api.db.gateway.model.GameDbResult
 import org.rsmod.api.db.gateway.model.fold
 import org.rsmod.api.player.output.mes
+import org.rsmod.api.game.process.GameLifecycle
 import org.rsmod.api.script.onCommand
+import org.rsmod.api.script.onEvent
 import org.rsmod.api.script.onGameStartup
 import org.rsmod.content.beanlab.core.BeanlabSchema
 import org.rsmod.game.cheat.Cheat
@@ -29,12 +31,14 @@ constructor(
     private val tokens: DbTokenStore,
     private val audit: DbAuditSink,
     private val playerList: PlayerList,
+    private val mapEdits: GameMapEditor,
 ) : PluginScript() {
     private val logger = InlineLogger()
     private var server: AdminHttpServer? = null
 
     override fun ScriptContext.startup() {
         onGameStartup { migrateThenStart() }
+        onEvent<GameLifecycle.LateCycle> { mapEdits.applyOnce() }
         onCommand("admintoken") {
             requiredRights = Rights.ADMINISTRATOR
             desc = "Issue an API token for the admin console: ::admintoken [revoke] (owners)"
@@ -63,7 +67,7 @@ constructor(
 
     private fun startServer() {
         val port = System.getenv("ADMIN_API_PORT")?.toIntOrNull() ?: DEFAULT_PORT
-        val created = AdminHttpServer(port, tokens, AdminRouter(backend, audit))
+        val created = AdminHttpServer(port, tokens, AdminRouter(backend, audit, map = mapEdits))
         try {
             created.start()
             server = created
