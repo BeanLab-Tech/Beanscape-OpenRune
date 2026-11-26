@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "size": 100,
+  "palette": {
+    "ground": 56,
+    "path": 55,
+    "interior": 45,
+    "hall": 71,
+    "rug": 27,
+    "plaza": 43
+  },
+  "ground": "ground",
+  "floors": [
+    { "rect": [46, 0, 53, 99], "floor": "path" },
+    { "rect": [0, 46, 99, 53], "floor": "path" },
+    { "rect": [75, 3, 96, 16], "floor": "interior" },
+    { "rect": [78, 5, 93, 14], "floor": "rug" },
+    { "rect": [4, 64, 41, 95], "floor": "plaza" }
+  ],
+  "rooms": [
+    { "name": "Weapons", "rect": [58, 82, 75, 95], "floor": "interior", "wall": "blackpaintedbrickwall_1",
+      "doors": [{ "side": "west", "from": 87, "to": 89 }] },
+    { "name": "Armour", "rect": [79, 82, 96, 95], "floor": "interior", "wall": "blackpaintedbrickwall_1",
+      "doors": [{ "side": "west", "from": 87, "to": 89 }] },
+    { "name": "Skilling", "rect": [58, 64, 75, 77], "floor": "interior", "wall": "blackpaintedbrickwall_1",
+      "doors": [{ "side": "west", "from": 69, "to": 71 }] },
+    { "name": "Runes", "rect": [79, 64, 96, 77], "floor": "interior", "wall": "blackpaintedbrickwall_1",
+      "doors": [{ "side": "west", "from": 69, "to": 71 }] },
+    { "name": "Food", "rect": [4, 21, 21, 34], "floor": "interior", "wall": "blackpaintedbrickwall_1",
+      "doors": [{ "side": "east", "from": 26, "to": 28 }] },
+    { "name": "General", "rect": [25, 21, 42, 34], "floor": "interior", "wall": "blackpaintedbrickwall_1",
+      "doors": [{ "side": "east", "from": 26, "to": 28 }] },
+    { "name": "Crafting", "rect": [4, 3, 21, 16], "floor": "interior", "wall": "blackpaintedbrickwall_1",
+      "doors": [{ "side": "east", "from": 8, "to": 10 }] },
+    { "name": "Fletching", "rect": [25, 3, 42, 16], "floor": "interior", "wall": "blackpaintedbrickwall_1",
+      "doors": [{ "side": "east", "from": 8, "to": 10 }] },
+    { "name": "Grand Exchange", "rect": [33, 39, 66, 60], "floor": "hall", "wall": "blackpaintedbrickwall_1",
+      "doors": [
+        { "side": "north", "from": 48, "to": 51 },
+        { "side": "south", "from": 48, "to": 51 },
+        { "side": "west", "from": 48, "to": 51 },
+        { "side": "east", "from": 48, "to": 51 }
+      ] }
+  ],
+  "detail": [
+    { "rect": [38, 43, 61, 56], "floor": "rug" }
+  ],
+  "walls": [
+    { "loc": "blackpaintedbrickwall_1", "line": [5, 95, 40, 95], "angle": "north" }
+  ],
+  "locs": [
+    { "loc": "noticeboard", "x": 9, "z": 95, "shape": "WallDecorStraightNoOffset", "angle": "north" },
+    { "loc": "noticeboard", "x": 22, "z": 95, "shape": "WallDecorStraightNoOffset", "angle": "north" },
+    { "loc": "noticeboard", "x": 35, "z": 95, "shape": "WallDecorStraightNoOffset", "angle": "north" }
+  ],
+  "npcs": [
+    { "npc": "zeke", "x": 66, "z": 88 },
+    { "npc": "horvik_the_armourer", "x": 87, "z": 88 },
+    { "npc": "bob", "x": 66, "z": 70 },
+    { "npc": "aubury", "x": 87, "z": 70 },
+    { "npc": "wydin", "x": 12, "z": 27 },
+    { "npc": "generalshopkeeper1", "x": 33, "z": 27 },
+    { "npc": "dommik", "x": 12, "z": 9 },
+    { "npc": "lowe", "x": 33, "z": 9 },
+    { "npc": "banker1", "x": 39, "z": 44 },
+    { "npc": "banker1", "x": 60, "z": 44 },
+    { "npc": "ge_clerk_1", "x": 40, "z": 55 },
+    { "npc": "ge_clerk_2", "x": 49, "z": 55 },
+    { "npc": "ge_clerk_3", "x": 59, "z": 55 }
+  ],
+  "arrival": { "x": 80, "z": 12 },
+  "leavePortal": { "x": 84, "z": 8 }
+}

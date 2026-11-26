@@ -1,6 +1,7 @@
 package org.rsmod.content.beanlab.admin.api
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
 
 /**
  * Maps requests to [AdminBackend] calls and owns every permission rule, so the rules are the same
@@ -10,7 +11,11 @@ import com.fasterxml.jackson.databind.JsonNode
  * - nobody may hand out a rank above their own;
  * - every write is audited, including refusals.
  */
-public class AdminRouter(private val backend: AdminBackend, private val audit: AuditSink) {
+public class AdminRouter(
+    private val backend: AdminBackend,
+    private val audit: AuditSink,
+    private val hub: HubLayoutPort = FileHubLayoutPort(),
+) {
     private class Route(
         val method: String,
         val pattern: Regex,
@@ -24,6 +29,8 @@ public class AdminRouter(private val backend: AdminBackend, private val audit: A
         val query: Map<String, String>,
         val body: JsonNode,
     )
+
+    private val mapper = ObjectMapper()
 
     private val routes: List<Route> =
         listOf(
@@ -46,6 +53,8 @@ public class AdminRouter(private val backend: AdminBackend, private val audit: A
             route("POST", "/v1/teleport", Rank.Moderator) { teleport(it) },
             route("POST", "/v1/world/broadcast", Rank.Admin) { broadcast(it) },
             route("POST", "/v1/world/reboot", Rank.Owner) { reboot(it) },
+            route("GET", "/v1/hub/layout", Rank.Owner) { hubLayout() },
+            route("PUT", "/v1/hub/layout", Rank.Owner) { saveHubLayout(it) },
             route("POST", "/v1/accounts", Rank.Admin) { createAccount(it) },
             route("POST", "/v1/accounts/(\\d+)/modlevel", Rank.Admin) { setAccountRank(it) },
             route("POST", "/v1/accounts/(\\d+)/password", Rank.Admin) { resetPassword(it) },
@@ -151,6 +160,44 @@ public class AdminRouter(private val backend: AdminBackend, private val audit: A
         }
         return audited(call.actor, "reboot", null, "in ${seconds}s") {
             mapOf("ok" to true, "message" to backend.reboot(call.actor, seconds))
+        }
+    }
+
+    // ---------------------------------------------------------------- hub layout
+
+    private fun hubLayout(): Map<String, Any?> {
+        val (text, source) = hub.read()
+        val layout =
+            try {
+                mapper.readTree(text)
+            } catch (error: Exception) {
+                throw ApiError(500, "The hub layout file isn't valid JSON. Save a new one over it.")
+            }
+        return mapOf(
+            "source" to source,
+            "layout" to layout,
+            "floorsEditable" to false,
+            "note" to
+                "Walls, objects and NPCs apply after a server restart. Floors need a cache rebuild.",
+        )
+    }
+
+    private fun saveHubLayout(call: Call): Map<String, Any?> {
+        val text = call.body.toString()
+        return audited(call.actor, "hub-layout", null, "${text.length} bytes") {
+            val problems = hub.write(text)
+            if (problems.isNotEmpty()) {
+                throw ApiError(
+                    422,
+                    "The layout has ${problems.size} problem(s); nothing was saved.",
+                    mapOf("problems" to problems),
+                )
+            }
+            mapOf(
+                "ok" to true,
+                "message" to "Saved. Restart the server to apply walls, objects and NPCs.",
+                "problems" to emptyList<String>(),
+            )
         }
     }
 

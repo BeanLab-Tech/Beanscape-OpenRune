@@ -70,6 +70,15 @@ class AdminHttpServerTest {
     }
 
     @Test
+    fun `hub layout problems are sent as a json list`() {
+        val (status, json) = send("PUT", "/v1/hub/layout", body = """{"version":1,"size":100}""")
+        assertEquals(422, status)
+        assertTrue(json["problems"].isArray)
+        assertTrue(json["problems"].any { it.asText() == "palette is empty" })
+        assertTrue(json["error"].asText().contains("nothing was saved"))
+    }
+
+    @Test
     fun `the tailscale mount prefix is accepted`() {
         assertEquals(200, send("GET", "/adminapi/v1/me").first)
     }
