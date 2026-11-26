@@ -52,7 +52,8 @@ is `docs/OPENRUNE_PHASE1_PLAN.md` in BeanLab-Tech/Beanscape-OSRS-Private-Server.
 |---|---|---|
 | `beanlab-core` | `[beanlab] loaded` marker; `BeanlabSchema` migrations for the `beanlab` Postgres schema | |
 | `beanlab-ge` | Grand Exchange (`::ge buy/sell/offers/cancel/collect/price`) | Ported from rev 233; tables in `beanlab.ge_*` |
-| `beanlab-admin-api` | Admin console API for the Beanscape Admin plugin (loopback HTTP, `ADMIN_API_PORT`), `::admintoken` (owners) | Ported from rev 233; tokens/audit in `beanlab.admin_*`; owners in `beanlab.owners` (Central rights stop at ADMINISTRATOR) |
+| `beanlab-admin-api` | Admin console API for the Beanscape Admin plugin (loopback HTTP, `ADMIN_API_PORT`), `::admintoken` (owners); `GET/PUT /v1/hub/layout` (owners) for the plugin's Hub map tab | Ported from rev 233; tokens/audit in `beanlab.admin_*`; owners in `beanlab.owners` (Central rights stop at ADMINISTRATOR) |
+| `beanlab-hub` (+ `pack`) | Market Hub: a clan hall portal on the GE plaza bench tile (3182, 3468) leads to a hub at x 5120-5219, z 3072-3171 (map squares 80..81 x 48..49). Layout in `pack/.../hub-layout.json` (format: `docs/HUB_LAYOUT.md` in the other repo); walls, objects and NPCs spawned at startup; `::hub` admin commands edit it live and save `.data/hub-layout.json` (or `HUB_LAYOUT_FILE`) | Ported from rev 233. Floors are generated from the bundled layout by `HubTerrainTask` during `buildCache`, so a floor change needs a cache rebuild; an override file only changes walls, objects, NPCs, arrival and leave portal (restart) |
 
 ## Changes to OpenRune files (upstream candidates)
 | Files | Change | Why |

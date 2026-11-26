@@ -61,7 +61,11 @@ jobs:
 
       - name: Test Beanscape modules
         run: |
-          tasks=$(for d in content/beanlab/*/; do [ -f "$d/build.gradle.kts" ] && echo ":content:beanlab:$(basename "$d"):test"; done)
+          tasks=$(for d in content/beanlab/*/; do
+            m=$(basename "$d")
+            if [ -f "$d/build.gradle.kts" ]; then echo ":content:beanlab:$m:test"; fi
+            if [ -f "$d/pack/build.gradle.kts" ]; then echo ":content:beanlab:$m:$m-pack:test"; fi
+          done)
           ./gradlew $tasks
 
       # OpenRune's own suite is reported but does not gate merges: upstream has had failing

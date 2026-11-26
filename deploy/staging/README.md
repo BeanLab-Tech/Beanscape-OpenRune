@@ -20,6 +20,14 @@ Build and restart (stop first: replacing jars under a running JVM breaks its shu
 A fresh checkout first needs `./gradlew --no-daemon :or-cache:freshCache :or-cache:mergePluginGamevals`
 and `./gradlew --no-daemon generateRsa` (a new key means a new modulus in the launcher).
 
+When a change touches a `pack` module (cache content, e.g. the Market Hub's floors in
+`beanlab-hub/pack`), stop the service and rebuild the cache before `installDist`; back up `.data/cache`
+first:
+
+    sudo systemctl stop beanscape-staging
+    sudo -u osrs cp -a .data/cache .data/cache.bak-$(date +%Y%m%d-%H%M)
+    sudo -u osrs ./gradlew --no-daemon --no-configuration-cache :or-cache:buildCache
+
 Let someone in:
 
     sudo -u postgres psql -d openrune_central -c \
