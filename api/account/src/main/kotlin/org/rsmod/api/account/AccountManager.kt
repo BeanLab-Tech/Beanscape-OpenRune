@@ -74,6 +74,17 @@ constructor(
         return loader.queue(loadRequest)
     }
 
+    /** Like [loadOrCreate], but only for accounts that already exist (registration required). */
+    public fun loadRegistered(
+        auth: AccountLoadAuth,
+        accountName: String,
+        callback: AccountLoadCallback,
+    ): Boolean {
+        val loadRequest =
+            AccountLoadRequest.SearchOrCreateCharacter(auth, accountName, WorldType.DEFAULT, callback)
+        return loader.queue(loadRequest)
+    }
+
     /** Loads [worldType]'s save, pinning the mode instead of resolving it from the preference. */
     public fun loadWorldTypeSwitch(
         accountName: String,

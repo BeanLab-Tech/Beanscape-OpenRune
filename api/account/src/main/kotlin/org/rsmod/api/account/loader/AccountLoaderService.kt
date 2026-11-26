@@ -266,6 +266,20 @@ constructor(
         for (pipeline in pipelines) {
             pipeline.append(this, metadataList)
         }
+        // BeanLab: a registered account's first character is created before Central checks the
+        // password, so a failed first login leaves a character that has never logged in. Keep
+        // treating it as new until it does, or it would skip new-player setup (spawn, XP rate).
+        if (
+            request is AccountLoadRequest.SearchOrCreateCharacter &&
+                metadataList.accountData.characterData.lastLogin == null
+        ) {
+            return AccountLoadResponse.Ok.NewAccount(
+                request.auth,
+                metadataList.accountData,
+                metadataList,
+                worldType,
+            )
+        }
         val response =
             AccountLoadResponse.Ok.LoadAccount(
                 request.auth,
@@ -286,6 +300,29 @@ constructor(
             is AccountLoadRequest.WorldTypeSwitch -> AccountLoadResponse.Err.AccountNotFound
             is AccountLoadRequest.SearchOrCreateWithPassword ->
                 createAccountResponse(request, worldType)
+            is AccountLoadRequest.SearchOrCreateCharacter ->
+                createCharacterResponse(request, worldType)
+        }
+
+    private fun DatabaseConnection.createCharacterResponse(
+        request: AccountLoadRequest.SearchOrCreateCharacter,
+        worldType: WorldType,
+    ): AccountLoadResponse =
+        try {
+            val accountId = repository.selectAccountId(this, request.accountName)
+            if (accountId == null) {
+                AccountLoadResponse.Err.AccountNotFound
+            } else {
+                val metadataList = createCharacterMetadataList(request.accountName, accountId)
+                AccountLoadResponse.Ok.NewAccount(
+                    request.auth,
+                    metadataList.accountData,
+                    metadataList,
+                    worldType,
+                )
+            }
+        } catch (e: Exception) {
+            AccountLoadResponse.Err.Exception(e)
         }
 
     private fun DatabaseConnection.createAccountResponse(
@@ -312,7 +349,13 @@ constructor(
         if (accountId == null) {
             throw IllegalStateException("Could not insert or select account id for: '$accountName'")
         }
+        return createCharacterMetadataList(accountName, accountId)
+    }
 
+    private fun DatabaseConnection.createCharacterMetadataList(
+        accountName: String,
+        accountId: Int,
+    ): CharacterMetadataList {
         val characterId = repository.insertAndSelectCharacterId(this, accountId)
         if (characterId == null) {
             throw IllegalStateException("Could not insert character for: '$accountName' ($accountId)")

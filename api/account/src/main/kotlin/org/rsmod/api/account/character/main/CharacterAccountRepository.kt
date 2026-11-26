@@ -86,22 +86,25 @@ constructor(
             it.executeUpdate()
         }
 
+        return selectAccountId(connection, storedName)
+    }
+
+    /** The id of the account named [accountName] (case-insensitive), or `null` if none exists. */
+    public fun selectAccountId(connection: DatabaseConnection, accountName: String): Int? {
         val select =
             connection.prepareStatement(
                 OpenRuneSql.text("game/character/accounts_select_id_by_account_name.sql"),
             )
-        val accountId =
-            select.use {
-                it.setString(1, storedName)
-                it.executeQuery().use { resultSet ->
-                    if (resultSet.next()) {
-                        resultSet.getIntOrNull("id")
-                    } else {
-                        null
-                    }
+        return select.use {
+            it.setString(1, accountName.trim())
+            it.executeQuery().use { resultSet ->
+                if (resultSet.next()) {
+                    resultSet.getIntOrNull("id")
+                } else {
+                    null
                 }
             }
-        return accountId
+        }
     }
 
     /** Read from `accounts`, so it resolves before a mode's schema is selected. */
