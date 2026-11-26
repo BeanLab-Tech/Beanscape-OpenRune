@@ -1,0 +1,35 @@
+# Beanscape OpenRune Central (staging). The database password comes from
+# /opt/osrs/openrune/secrets.env. Central only reads top-level env aliases, so the VM copy
+# gets `password:` added under `database:` (0640 root:osrs). Never commit that copy.
+openrune:
+  serverName: Beanscape
+  auth:
+    passwordHasher: argon2      # matches the Discord bot (argon2i)
+    argon2Iterations: 20
+    argon2MemoryKib: 65536
+  database:
+    host: 127.0.0.1
+    port: 5432
+    name: openrune_central
+    user: openrune
+    poolSize: 10
+  http:
+    port: 8090                  # 8080 is taken by osrs-webconfig; firewall keeps it local
+    trustProxy: false
+  worldLink:
+    port: 9091
+    soBacklog: 512
+    readTimeoutSeconds: 120
+  session:
+    ttlMs: 60000
+  analytics:
+    onlineSampleIntervalSeconds: 3600
+  javConfig:
+    revision: 242
+    remoteUrlTemplate: https://client.blurite.io/jav_local_%d.ws
+    refreshMinutes: 15
+    httpTimeoutSeconds: 20
+    configProps:
+      title: Beanscape Staging
+  devWorld:
+    autoCreate: false           # worlds are registered explicitly

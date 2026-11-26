@@ -1,0 +1,17 @@
+[Unit]
+Description=OpenRune Central for Beanscape staging (accounts, world link)
+After=network-online.target postgresql.service
+Requires=postgresql.service
+
+[Service]
+User=osrs
+Group=osrs
+WorkingDirectory=/opt/osrs/openrune/central
+EnvironmentFile=/opt/osrs/openrune/secrets.env
+Environment=OPENRUNE_CONFIG=/opt/osrs/openrune/central/central-config.yaml
+ExecStart=/usr/bin/java -Xms128m -Xmx512m -jar /opt/osrs/openrune/central/openrune-central-server.jar
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

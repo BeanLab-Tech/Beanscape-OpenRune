@@ -25,3 +25,13 @@ is `docs/OPENRUNE_PHASE1_PLAN.md` in BeanLab-Tech/Beanscape-OSRS-Private-Server.
 |---|---|---|
 | `beanlab-core` | `[beanlab] loaded` marker; `BeanlabSchema` migrations for the `beanlab` Postgres schema | |
 | `beanlab-ge` | Grand Exchange (`::ge buy/sell/offers/cancel/collect/price`) | Ported from rev 233; tables in `beanlab.ge_*` |
+
+## Known issues
+- **GE atomicity (audit R6):** GE offer state and inventories are saved in separate transactions;
+  a failed GE write after `::ge collect` or a sell can duplicate or lose items/gold. Fix: write
+  COLLECTED before handing out items, retry/roll back failed persists, or keep a ledger.
+- **Open registration (D4):** Central creates any unknown account on first login. OpenRune loads
+  `realms.require_registration` into `RealmConfig` but nothing enforces it. Fix in W3 by honouring it
+  in the login path before contacting Central (upstream PR candidate).
+- **Flyway vs PostgreSQL 18:** Central's Flyway warns PostgreSQL 18.6 is newer than it was tested
+  with (Ubuntu 26.04 only ships 18). Works so far; watch Central upgrades.
