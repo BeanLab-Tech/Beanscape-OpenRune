@@ -25,6 +25,7 @@ is `docs/OPENRUNE_PHASE1_PLAN.md` in BeanLab-Tech/Beanscape-OSRS-Private-Server.
 |---|---|---|
 | `beanlab-core` | `[beanlab] loaded` marker; `BeanlabSchema` migrations for the `beanlab` Postgres schema | |
 | `beanlab-ge` | Grand Exchange (`::ge buy/sell/offers/cancel/collect/price`) | Ported from rev 233; tables in `beanlab.ge_*` |
+| `beanlab-admin-api` | Admin console API for the Beanscape Admin plugin (loopback HTTP, `ADMIN_API_PORT`), `::admintoken` (owners) | Ported from rev 233; tokens/audit in `beanlab.admin_*`; owners in `beanlab.owners` (Central rights stop at ADMINISTRATOR) |
 
 ## Changes to OpenRune files (upstream candidates)
 | Files | Change | Why |
