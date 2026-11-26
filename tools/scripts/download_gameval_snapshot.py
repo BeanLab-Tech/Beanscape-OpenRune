@@ -11,6 +11,7 @@ from pathlib import Path
 from zipfile import BadZipFile, ZipFile
 
 ASSET = "osrs-gamevals.zip"
+UPSTREAM_REPO = "OpenRune/OpenRune-Server"
 FILES = ("gamevals.dat", "gamevals_generated.dat", "max-ids.toml", "revision.txt")
 
 
@@ -26,15 +27,18 @@ def main() -> None:
     revision = match.group(1)
     tag = f"gamevals-{revision}"
 
+    # BeanLab: forks have no gameval releases of their own, so fall back to OpenRune's.
+    repos = [os.environ["GITHUB_REPOSITORY"]]
+    if repos[0] != UPSTREAM_REPO:
+        repos.append(UPSTREAM_REPO)
     with tempfile.TemporaryDirectory() as work:
-        result = subprocess.run(
-            [
-                "gh", "release", "download", tag,
-                "--repo", os.environ["GITHUB_REPOSITORY"],
-                "--pattern", ASSET, "--dir", work,
-            ],
-            check=False,
-        )
+        for repo in repos:
+            result = subprocess.run(
+                ["gh", "release", "download", tag, "--repo", repo, "--pattern", ASSET, "--dir", work],
+                check=False,
+            )
+            if not result.returncode:
+                break
         if result.returncode:
             raise SystemExit(
                 f"Could not download {tag}. Run Publish Revision Gamevals for {revision}."
