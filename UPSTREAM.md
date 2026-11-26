@@ -67,3 +67,8 @@ is `docs/OPENRUNE_PHASE1_PLAN.md` in BeanLab-Tech/Beanscape-OSRS-Private-Server.
   (see "Changes to OpenRune files").
 - **Flyway vs PostgreSQL 18:** Central's Flyway warns PostgreSQL 18.6 is newer than it was tested
   with (Ubuntu 26.04 only ships 18). Works so far; watch Central upgrades.
+- **Central is patched:** the VM runs Central `d694191` plus `deploy/central/patches/` (the
+  world-login whitelist was broken, so no one could log in to a whitelisted world). Rebuilding
+  Central without the patches brings that back; see `deploy/central/README.md`.
+- **Bots:** OpenRune's cosmetic bots (`gameplay.bots-enabled`) are off on staging. With them on,
+  bots fill busy areas near a player (Lumbridge etc.); `::bots on|off|here` manages them in game.

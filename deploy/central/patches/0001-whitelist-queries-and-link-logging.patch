@@ -1,0 +1,66 @@
+diff --git a/central-app/src/main/kotlin/dev/or2/central/db/repositories/WorldRepository.kt b/central-app/src/main/kotlin/dev/or2/central/db/repositories/WorldRepository.kt
+index 13c49f6..dc7c078 100644
+--- a/central-app/src/main/kotlin/dev/or2/central/db/repositories/WorldRepository.kt
++++ b/central-app/src/main/kotlin/dev/or2/central/db/repositories/WorldRepository.kt
+@@ -82,10 +82,12 @@ class WorldRepository(
+         }
+     }
+ 
++    // Beanscape: the two queries were swapped. login_whitelist_exists.sql takes (world_id,
++    // account_name), and the table has no login_username column, so every login to a whitelisted
++    // world threw and Central dropped the connection without replying.
+     fun hasLoginWhitelistEntries(worldId: Int): Boolean {
+-        val sql = OpenRuneSql.text("game/world/login_whitelist_exists.sql")
+         return dataSource.connection.use { conn ->
+-            conn.prepareStatement(sql).use { ps ->
++            conn.prepareStatement("SELECT 1 FROM world_login_whitelist WHERE world_id = ? LIMIT 1").use { ps ->
+                 ps.setInt(1, worldId)
+                 ps.executeQuery().use { rs -> rs.next() }
+             }
+@@ -94,13 +96,7 @@ class WorldRepository(
+ 
+     fun isLoginWhitelisted(worldId: Int, loginUsername: String): Boolean {
+         return dataSource.connection.use { conn ->
+-            conn.prepareStatement(
+-                """
+-                SELECT 1 FROM world_login_whitelist
+-                WHERE world_id = ? AND LOWER(login_username) = LOWER(?)
+-                LIMIT 1
+-                """.trimIndent(),
+-            ).use { ps ->
++            conn.prepareStatement(OpenRuneSql.text("game/world/login_whitelist_exists.sql")).use { ps ->
+                 ps.setInt(1, worldId)
+                 ps.setString(2, loginUsername)
+                 ps.executeQuery().use { rs -> rs.next() }
+diff --git a/central-app/src/main/kotlin/dev/or2/central/worldlink/net/WorldLinkServer.kt b/central-app/src/main/kotlin/dev/or2/central/worldlink/net/WorldLinkServer.kt
+index eaf579e..4715c9c 100644
+--- a/central-app/src/main/kotlin/dev/or2/central/worldlink/net/WorldLinkServer.kt
++++ b/central-app/src/main/kotlin/dev/or2/central/worldlink/net/WorldLinkServer.kt
+@@ -21,6 +21,9 @@ import io.netty.handler.codec.LengthFieldPrepender
+ import io.netty.handler.timeout.ReadTimeoutHandler
+ import java.util.concurrent.TimeUnit
+ import java.util.concurrent.atomic.AtomicInteger
++import org.slf4j.LoggerFactory
++
++private val linkLog = LoggerFactory.getLogger("dev.or2.central.worldlink.net")
+ 
+ class WorldLinkServer(
+     private val config: WorldLinkConfig,
+@@ -111,7 +114,8 @@ private class WorldLinkChannelHandler(
+             if (connection.subscribedForPush) {
+                 removeReadTimeout(ctx)
+             }
+-        } catch (_: Exception) {
++        } catch (e: Exception) {
++            linkLog.warn("World-link handler failed (worldId={}); closing the channel", connection.worldId, e)
+             if (buf.refCnt() > 0) {
+                 buf.release()
+             }
+@@ -125,6 +129,7 @@ private class WorldLinkChannelHandler(
+     }
+ 
+     override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
++        linkLog.warn("World-link channel error (worldId={})", connection.worldId, cause)
+         ctx.close()
+     }
+ }
