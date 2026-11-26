@@ -1,0 +1,11 @@
+# Staging auto-deploy: see deploy/staging/deploy-staging.sh. Triggered by the .timer next to it.
+[Unit]
+Description=Beanscape staging auto-deploy from GitHub main (see deploy/staging/deploy-staging.sh)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/osrs/openrune/deploy/deploy-staging.sh
+# Cache rebuild + installDist can take a few minutes on a cold Gradle cache.
+TimeoutStartSec=1800
