@@ -106,6 +106,11 @@ class AccountLoadResponseHook(
                     response.account.accountName,
                     response.account.characterData.characterId,
                 )
+                // BeanLab: with require_registration, an existing (pre-registered) account gets a
+                // NewAccount response for its first character, and it may already have 2FA.
+                if (!passesTwoFactor(response)) {
+                    return
+                }
                 safeQueueLogin(response)
             }
             is AccountLoadResponse.Ok.LoadAccount -> {
@@ -133,16 +138,15 @@ class AccountLoadResponseHook(
         }
     }
 
-    private fun validateAndQueueLogin(response: AccountLoadResponse.Ok.LoadAccount) {
-        // Note: We could move this branch to `handleLoadResponse`, but we intentionally keep it
-        // here to mirror the production login flow.
+    /** Runs the TOTP check when the account has 2FA; writes the error response and returns false on failure. */
+    private fun passesTwoFactor(response: AccountLoadResponse.Ok): Boolean {
         val twoFactor = response.account.twoFactorAuth
         if (twoFactor.twoFactorConfirmed) {
             val storedSecret = twoFactor.twoFactorSecret
             if (storedSecret == null) {
                 writeErrorResponse(LoginResponse.InvalidAuthenticatorCode)
                 logger.error { "Two-factor enabled without a stored secret: ${response.account}" }
-                return
+                return false
             }
 
             val secret = resolveTotpSecret(storedSecret)
@@ -152,18 +156,27 @@ class AccountLoadResponseHook(
                     "Could not decode two-factor secret for ${response.account.accountName} " +
                         "(set app-key in api/totp/src/main/resources/laravel-settings.yml for Laravel secrets)"
                 }
-                return
+                return false
             }
 
             try {
                 val authResponse = validateTwoFactor(response.account, response.auth, secret)
                 if (authResponse != null) {
                     writeErrorResponse(authResponse)
-                    return
+                    return false
                 }
             } finally {
                 secret.fill('\u0000')
             }
+        }
+        return true
+    }
+
+    private fun validateAndQueueLogin(response: AccountLoadResponse.Ok.LoadAccount) {
+        // Note: We could move this branch to `handleLoadResponse`, but we intentionally keep it
+        // here to mirror the production login flow.
+        if (!passesTwoFactor(response)) {
+            return
         }
 
         // `CharacterAccountRepository.save` always sets `last_logout` in same UPDATE as
