@@ -7,6 +7,7 @@ import dev.openrune.rscm.RSCM
 import dev.openrune.rscm.RSCMType
 import dev.openrune.types.ItemServerType
 import dev.openrune.types.StatType
+import dev.or2.central.auth.PasswordAuthConfig
 import jakarta.inject.Inject
 import java.lang.management.ManagementFactory
 import java.security.SecureRandom
@@ -29,7 +30,6 @@ import org.rsmod.api.player.stat.statAdvance
 import org.rsmod.api.player.stat.statRestoreAll
 import org.rsmod.api.player.stat.statSub
 import org.rsmod.api.player.ui.PlayerInterfaceUpdates
-import org.rsmod.api.pw.hash.PasswordHashing
 import org.rsmod.api.realm.Realm
 import org.rsmod.api.server.config.ServerConfig
 import org.rsmod.api.utils.system.SafeServiceExit
@@ -53,12 +53,18 @@ constructor(
     private val playerList: PlayerList,
     private val launcher: ProtectedAccessLauncher,
     private val realm: Realm,
-    private val hashing: PasswordHashing,
     private val config: ServerConfig,
 ) : AdminBackend {
     private val logger = InlineLogger()
     private val random = SecureRandom()
     private val rebootScheduled = AtomicBoolean(false)
+
+    /**
+     * Same algorithm and parameters as Central on the VM (`passwordHasher: argon2`) and the Discord
+     * bot (argon2i, t=20, m=65536). Central verifies by the encoded parameters, so any change here
+     * still verifies, but keep them in step.
+     */
+    private val hasher = PasswordAuthConfig("argon2", BCRYPT_COST, ARGON2_ITERATIONS, ARGON2_MEMORY_KIB).toHasher()
 
     /** Account ids of owners, refreshed whenever ranks are read or changed. */
     @Volatile private var owners: Set<Int> = emptySet()
@@ -377,7 +383,7 @@ constructor(
 
     override fun createAccount(actor: Actor, username: String, rank: Rank): Map<String, Any?> {
         val password = generatePassword()
-        val hash = hashing.hash(password.toCharArray())
+        val hash = hasher.hash(password)
         val world = config.world
         val created =
             access.query { connection ->
@@ -425,7 +431,7 @@ constructor(
 
     override fun resetPassword(actor: Actor, id: Int): Map<String, Any?> {
         val password = generatePassword()
-        val hash = hashing.hash(password.toCharArray())
+        val hash = hasher.hash(password)
         access.query { connection ->
             connection.prepareStatement("UPDATE accounts SET password_hash = ? WHERE id = ?").use {
                 it.setString(1, hash)
@@ -545,6 +551,9 @@ constructor(
         private const val MAX_LEVEL = 99
         private const val SECONDS_PER_MINUTE = 60
         private const val PASSWORD_LENGTH = 16
+        private const val BCRYPT_COST = 12
+        private const val ARGON2_ITERATIONS = 20
+        private const val ARGON2_MEMORY_KIB = 65536
         private const val PASSWORD_CHARS =
             "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789"
     }

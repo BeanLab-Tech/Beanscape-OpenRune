@@ -8,7 +8,6 @@ dependencies {
     implementation(projects.api.dbGateway)
     implementation(projects.api.invtx)
     implementation(projects.api.pluginCommons)
-    implementation(projects.api.pwHash)
     implementation(projects.api.realm)
     implementation(projects.api.serverConfig)
     implementation(projects.api.utils.utilsSystem)
