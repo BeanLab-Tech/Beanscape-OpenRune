@@ -19,3 +19,9 @@ is `docs/OPENRUNE_PHASE1_PLAN.md` in BeanLab-Tech/Beanscape-OSRS-Private-Server.
 | Date | OpenRune commit | Revision |
 |---|---|---|
 | 2026-11-25 | `3bcc0168d` | 242 |
+
+## Beanscape modules
+| Module | What | Notes |
+|---|---|---|
+| `beanlab-core` | `[beanlab] loaded` marker; `BeanlabSchema` migrations for the `beanlab` Postgres schema | |
+| `beanlab-ge` | Grand Exchange (`::ge buy/sell/offers/cancel/collect/price`) | Ported from rev 233; tables in `beanlab.ge_*` |
