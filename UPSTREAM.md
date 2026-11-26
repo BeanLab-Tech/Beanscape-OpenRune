@@ -50,8 +50,9 @@ is `docs/OPENRUNE_PHASE1_PLAN.md` in BeanLab-Tech/Beanscape-OSRS-Private-Server.
 ## Beanscape modules
 | Module | What | Notes |
 |---|---|---|
-| `beanlab-core` | `[beanlab] loaded` marker; `BeanlabSchema` migrations for the `beanlab` Postgres schema | |
+| `beanlab-core` | `[beanlab] loaded` marker; `BeanlabSchema` migrations for the `beanlab` Postgres schema; `TeleportCatalog` (shared by the admin API and `::teleports`) | |
 | `beanlab-ge` | Grand Exchange (`::ge buy/sell/offers/cancel/collect/price`) | Ported from rev 233; tables in `beanlab.ge_*` |
+| `beanlab-admin-tools` | Staff in-game tools: `::teleports` / `::tp` menu (MOD and up; categories, search, previous, typed coordinates) | Ported from rev 233 `admin-potato`; potato and `::questsdone` still to come |
 | `beanlab-admin-api` | Admin console API for the Beanscape Admin plugin (loopback HTTP, `ADMIN_API_PORT`), `::admintoken` (owners) | Ported from rev 233; tokens/audit in `beanlab.admin_*`; owners in `beanlab.owners` (Central rights stop at ADMINISTRATOR) |
 
 ## Changes to OpenRune files (upstream candidates)

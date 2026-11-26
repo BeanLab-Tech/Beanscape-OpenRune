@@ -82,7 +82,9 @@ if [ "$current" = none ] || [ "$FORCE" = "--force" ] || ! as_osrs git -C "$SRV" 
 else
     changed=$(as_osrs git -C "$SRV" diff --name-only "$current" "$target")
 fi
-if ! echo "$changed" | grep -qvE '\.md$|^docs/|^\.github/'; then
+# A here-string, not `echo | grep -q`: with pipefail, grep -q exiting early on a long list makes
+# echo die of SIGPIPE and the pipeline "fail", which once marked a full deploy as docs-only.
+if ! grep -qvE '\.md$|^docs/|^\.github/' <<<"$changed"; then
     log "main ${target:0:7}: docs-only change, recording without restart"
     echo "$target" > "$BASE/deployed-sha"
     exit 0
