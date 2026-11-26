@@ -26,6 +26,22 @@ there as `openrune-central-server.jar.d694191`.
 |---|---|
 | `0001-whitelist-queries-and-link-logging.patch` | **Every login to a whitelisted world failed** ("No reply from loginserver"). `WorldRepository.hasLoginWhitelistEntries` ran `login_whitelist_exists.sql`, which takes two parameters, with one; `isLoginWhitelisted` used the `login_username` column that Central's own V20 renamed to `account_name`. The queries are swapped back. The world-link server also swallowed every handler exception and closed the channel silently; it now logs them. Upstream candidate for OpenRune-Central-Server. |
 
+**Config the VM copy of `central-config.yaml` must keep** (besides the secrets):
+
+    openrune:
+      badWords:
+        remoteUrl: ""     # 2026-11-26
+
+Central's default remote profanity list (a gist) has short entries that shrink to two letters once
+symbols are dropped (`s&m` -> `sm`, `as$` -> `as`), so its world-login check refused names like
+smith, thomas and jason. Beanscape sign-up (overlay `web/central_sync.py`) writes every new account
+into Central and applies the same rules, also with no list. If you turn a list back on, point
+`OPENRUNE_BAD_WORDS_URL` for the web panel and bot at the same URL.
+
+Accounts arrive in Central from the live sign-up (web OAuth and the Discord bot, `/resetpassword`
+too). Copy existing live accounts with
+`sudo /opt/osrs/web/venv/bin/python /opt/osrs/web/central_sync.py sync --all` (dry run; add `--apply`).
+
 Add a staff account to the staging whitelist:
 
     INSERT INTO world_login_whitelist (world_id, account_name) VALUES (2, '<name>');
